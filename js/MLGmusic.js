@@ -84,6 +84,7 @@ Music.prototype = {
             for(var i=0;i<lrcObjArr.length;i++){
                 var liObj = $("<li/>");
                 liObj.html(lrcObjArr[i].lrcContent);
+                liObj.data("lrcTime",lrcObjArr[i].myTime);
                 ulObj.append(liObj);
             }
         }
@@ -91,21 +92,22 @@ Music.prototype = {
     scrollLrc:function(){
         var curTime = parseInt($("#audioPlay")[0].currentTime);
         var lrcShow = $("#lrcShow");
-        var lrcObjArr = this.parseLyric();
         if(!lrcShow.find("h4")[0]){
-            var num = this.lrcNum;
             var keepTime = 100;  //歌词整齐了，之前500太长
-            if(num >= lrcObjArr.length){
+            var num = this.lrcNum;
+            if(num >= lrcShow.find("li").length){
                 this.lrcNum = 0;
                 return;
             }
-            if(curTime >= lrcObjArr[num].myTime){
-                lrcShow.find("li").get(num).setAttribute("class","lrcActive");
+            if(curTime >= lrcShow.find("li").eq(num).data("lrcTime")){
+                lrcShow.find("li").eq(num).attr("class","lrcActive");
                 if(num != 0){
                     lrcShow.find("li").get(num-1).setAttribute("class","");
                 }
-                if(num>8 && lrcObjArr[num].lrcContent){
-                    lrcShow.css("top",(parseInt(lrcShow.css("top"))-25+"px"));
+                if(num>8 && lrcShow.find("li").eq(num).html()){
+                    lrcShow[0].style.top = parseInt(lrcShow[0].style.top)-25+"px";
+                    //贱贱的jQuery，如果用下面这句话，页面不激活的时候，不会滚动歌词
+                    //lrcShow.css("top",(parseInt(lrcShow.css("top"))-25+"px"));
                 }else if(num<=8){
                     lrcShow.css("top","0px");
                 }
@@ -271,12 +273,81 @@ $("#mute").click(function(){
     if(classVal.indexOf("up")>=0){
         classVal = classVal.replace("up","off");
         $(this).attr("class",classVal);
+        $("#voiceControl span").css("top","100px");
         $("#audioPlay")[0].muted = true;
     }else{
         classVal = classVal.replace("off","up");
         $(this).attr("class",classVal);
+        $("#voiceControl span").css("top","0px");
         $("#audioPlay")[0].muted = false;
     }
+});
+$("#mute").hover(function(){
+    $("#voiceWrap").fadeIn(100);
+},function(){
+    $("#voiceWrap").fadeOut(200);
+});
+//音量调节
+//音量调节出现|消失
+$("#voiceWrap").hover(function(){
+    $("#voiceWrap").fadeIn(100);
+},function(){
+    $("#voiceWrap").fadeOut(200);
+});
+//音量改变 拖动效果
+var moveVoice = false;
+//起始Y坐标
+var voiceY;
+$("#voiceControl span").bind("mousedown",function(event){
+    moveVoice = true;
+    voiceY = parseInt(event.clientY);
+});
+$("#voiceControl span").bind("mousemove",function(event){
+    if(moveVoice){
+        //获取变化后的坐标
+        var _y;
+        if(parseInt(event.clientY)>voiceY){
+            _y = parseInt($(this).position().top);   
+            _y ++;
+        }else{
+            _y = parseInt($(this).position().top);
+            _y --;
+        }
+        if(_y<0){
+            _y = 0;
+        }else if(_y > 100){
+            _y = 100;
+        }
+        //设置拖动样式
+        $(this).css("top",_y+"px");
+        _y = 100-_y;
+        $(this).attr("title",_y);
+        //如果音量为0，则将图标变为静音
+        var classVal = $("#mute").attr("class");
+        if(_y == 0){
+            classVal = classVal.replace("up","off");
+            $("#mute").attr("class",classVal);
+        }else{
+            classVal = classVal.replace("off","up");
+            $("#mute").attr("class",classVal);
+        }
+        //设置音效改变
+        $("#audioPlay")[0].volume = _y/100;
+    }
+});
+$("#voiceControl span").bind("mouseup mouseout",function(event){
+    moveVoice = false;
+});
+//音量改变 点击效果
+$("#voiceControl").click(function(event){
+    var _hy = parseInt($("#voiceWrap").offset().top);
+        _hy += 15;
+    //var _ly = parseInt($("#voiceWrap").offset().top)+125;
+    console.log(_hy);
+    console.log(event.clientY);
+    var _y = parseInt(event.clientY)-_hy;
+    console.log(_y);
+    //$("#voiceControl span").css("top",_y+"px");
 });
 //循环键的操作
 $("#reptMusic").click(function(){
