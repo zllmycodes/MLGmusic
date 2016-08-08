@@ -253,6 +253,33 @@ function progressShow(){
     //重复调用
     timeClock = setTimeout(arguments.callee,1000);
 }
+//进度条按钮的拖动
+var moveProgress = false;
+var progressX;
+$("#progressBtn").mousedown(function(event){
+    moveProgress = true;
+    progressX = event.pageX;
+});
+$("#progressBtn").mousemove(function(event){
+    var ltX = parseInt($(".progress").parent().offset().left);
+    var _x = parseInt($(this).css("left"));
+    if(moveProgress){
+        if(progressX<parseInt(event.pageX)){   
+            _x++;
+        }else{  
+            _x--;
+        }
+        if(_x<15) _x=15;
+        if(_x>310)_x=310; 
+        $(this).css("left",_x+"px");
+        $("#progressBar").css("width",((_x-15)/305*100)+"%");
+        //console.log($("#progressBar").css("width"));
+        //console.log($(this).css("left"));
+    }
+});
+$("#progressBtn").bind("mouseup mouseout",function(event){
+    moveProgress = false;
+});
 //控件操作
 //播放机|暂停键的操作
 $("#playMusic").click(function(){
