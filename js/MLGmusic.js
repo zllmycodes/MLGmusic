@@ -275,11 +275,14 @@ $("#mute").click(function(){
         $(this).attr("class",classVal);
         $("#voiceControl span").css("top","100px");
         $("#audioPlay")[0].muted = true;
+        $("#voiceControl span").attr("title",0);
     }else{
         classVal = classVal.replace("off","up");
         $(this).attr("class",classVal);
         $("#voiceControl span").css("top","0px");
         $("#audioPlay")[0].muted = false;
+        $("#voiceControl span").attr("title",100);
+        $("#audioPlay")[0].volume = 1;
     }
 });
 $("#mute").hover(function(){
@@ -300,18 +303,21 @@ var moveVoice = false;
 var voiceY;
 $("#voiceControl span").bind("mousedown",function(event){
     moveVoice = true;
-    voiceY = parseInt(event.clientY);
+    voiceY = parseInt(event.pageY);
 });
 $("#voiceControl span").bind("mousemove",function(event){
+    //激活音量调节控件
+    $("#voiceWrap").addClass("voiceWrapActive");
+    //改变音量
     if(moveVoice){
         //获取变化后的坐标
         var _y;
-        if(parseInt(event.clientY)>voiceY){
-            _y = parseInt($(this).position().top);   
-            _y ++;
+        if(parseInt(event.pageY)-voiceY>0){  
+            _y = parseInt($(this).css("top"));
+            _y++;
         }else{
-            _y = parseInt($(this).position().top);
-            _y --;
+            _y = parseInt($(this).css("top"));
+            _y--;
         }
         if(_y<0){
             _y = 0;
@@ -327,27 +333,54 @@ $("#voiceControl span").bind("mousemove",function(event){
         if(_y == 0){
             classVal = classVal.replace("up","off");
             $("#mute").attr("class",classVal);
+            $("#audioPlay")[0].muted = true;
         }else{
             classVal = classVal.replace("off","up");
             $("#mute").attr("class",classVal);
+            $("#audioPlay")[0].muted = false;
+            //设置音效改变
+            $("#audioPlay")[0].volume = _y/100;
         }
-        //设置音效改变
-        $("#audioPlay")[0].volume = _y/100;
     }
 });
 $("#voiceControl span").bind("mouseup mouseout",function(event){
     moveVoice = false;
+    //音量调节控件
+    $("#voiceWrap").removeClass("voiceWrapActive");
 });
 //音量改变 点击效果
 $("#voiceControl").click(function(event){
-    var _hy = parseInt($("#voiceWrap").offset().top);
-        _hy += 15;
-    //var _ly = parseInt($("#voiceWrap").offset().top)+125;
-    console.log(_hy);
-    console.log(event.clientY);
-    var _y = parseInt(event.clientY)-_hy;
-    console.log(_y);
-    //$("#voiceControl span").css("top",_y+"px");
+    var hy = parseInt($("#voiceWrap").offset().top)+15;
+    var ly = parseInt($("#voiceWrap").offset().top)+125;
+    var _y = parseInt(event.pageY);//event里有三种clientY,screenY,pageY
+    if(_y<=ly){
+        _y -= hy;
+        if(_y>100){
+            _y = 100;
+        }
+        $("#voiceControl span").css("top",_y+"px");
+        _y = 100-_y;
+        $("#voiceControl span").attr("title",_y);
+        //如果音量为0，则将图标变为静音
+        var classVal = $("#mute").attr("class");
+        if(_y == 0){
+            classVal = classVal.replace("up","off");
+            $("#mute").attr("class",classVal);
+            $("#audioPlay")[0].muted = true;
+        }else{
+            classVal = classVal.replace("off","up");
+            $("#mute").attr("class",classVal);
+            $("#audioPlay")[0].muted = false;
+            //设置音效改变
+            $("#audioPlay")[0].volume = _y/100;
+        }
+    }
+});
+//音量调节激活样式
+$("#voiceControl").hover(function(){
+    $("#voiceWrap").addClass("voiceWrapActive");
+},function(){
+    $("#voiceWrap").removeClass("voiceWrapActive");
 });
 //循环键的操作
 $("#reptMusic").click(function(){
