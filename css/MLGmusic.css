@@ -98,16 +98,12 @@ main{
 }
 .progress{
 	width: 305px;
+	cursor: pointer;
 }
-#progressWrap div.progress div#progressBar{
-	float: left;
-	width: 0;
-	height: 100%;
-	font-size: 12px;
-	line-height: 20px;
-	color: #fff;
-	text-align: center;
-	background-color: #5bc0de;
+div#progressBar{
+	-webkit-transition-duration:0s;
+		 -o-transition-duration:0s;
+			transition-duration:0s;
 }
 #progressBtn{
 	position: absolute;

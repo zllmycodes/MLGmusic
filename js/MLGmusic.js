@@ -94,26 +94,25 @@ Music.prototype = {
         var lrcShow = $("#lrcShow");
         if(!lrcShow.find("h4")[0]){
             var keepTime = 100;  //歌词整齐了，之前500太长
-            var num = this.lrcNum;
-            if(num >= lrcShow.find("li").length){
-                this.lrcNum = 0;
-                return;
-            }
-            if(curTime >= lrcShow.find("li").eq(num).data("lrcTime")){
-                lrcShow.find("li").eq(num).attr("class","lrcActive");
-                if(num != 0){
-                    lrcShow.find("li").get(num-1).setAttribute("class","");
+            //判断当前active的歌词对应的播放时间是在curTime之前还是之后
+            //此处为写了进度条拖动后，再来写歌词拖动后效果
+            var countEmptyContent = 0;
+            lrcShow.find("li").each(function(index){
+                if(!$(this).html()){
+                    countEmptyContent++;
                 }
-                if(num>8 && lrcShow.find("li").eq(num).html()){
-                    lrcShow[0].style.top = parseInt(lrcShow[0].style.top)-25+"px";
-                    //贱贱的jQuery，如果用下面这句话，页面不激活的时候，不会滚动歌词
-                    //lrcShow.css("top",(parseInt(lrcShow.css("top"))-25+"px"));
-                }else if(num<=8){
-                    lrcShow.css("top","0px");
+                if(curTime >= $(this).data("lrcTime")){
+                    lrcShow.find("li.lrcActive").removeClass("lrcActive");
+                    $(this).addClass("lrcActive");
+                    var move = index - countEmptyContent;
+                    if(move<=7){
+                        lrcShow.css("top","0px");
+                    }else{
+                        lrcShow[0].style.top = -(move-8)*27+"px";
+                    }
+                    keepTime = 1000;
                 }
-                this.lrcNum++;
-                keepTime = 1000;
-            }
+            });
             var _this = this;
             playClock = setTimeout(function(){
                 _this.scrollLrc();
@@ -249,19 +248,25 @@ function progressShow(){
     $("#musicTime").html(curMin+":"+curSec+"/"+(durationMin+":"+durationSec));
     //进度条的显示
     $("#progressBar").css("width",((audioObj.currentTime/audioObj.duration)*100+"%"));
-
+    var progressBtnLeft = $("#progressBtn").css("left");
+    progressBtnLeft = audioObj.currentTime/audioObj.duration*305+15;
+    if(progressBtnLeft<15) progressBtnLeft=15;
+    if(progressBtnLeft>310)progressBtnLeft=310;
+    $("#progressBtn").css("left",progressBtnLeft);
     //重复调用
     timeClock = setTimeout(arguments.callee,1000);
 }
 //进度条按钮的拖动
 var moveProgress = false;
-var progressX;
+var progressX,curTime;
 $("#progressBtn").mousedown(function(event){
     moveProgress = true;
     progressX = event.pageX;
+    curTime = $("#audioPlay")[0].currentTime;
+    clearTimeout(timeClock);
+    clearTimeout(playClock);
 });
 $("#progressBtn").mousemove(function(event){
-    var ltX = parseInt($(".progress").parent().offset().left);
     var _x = parseInt($(this).css("left"));
     if(moveProgress){
         if(progressX<parseInt(event.pageX)){   
@@ -271,14 +276,35 @@ $("#progressBtn").mousemove(function(event){
         }
         if(_x<15) _x=15;
         if(_x>310)_x=310; 
+        
         $(this).css("left",_x+"px");
         $("#progressBar").css("width",((_x-15)/305*100)+"%");
-        //console.log($("#progressBar").css("width"));
-        //console.log($(this).css("left"));
+        var audioObj = $("#audioPlay")[0];
+        audioObj.currentTime = parseFloat($("#progressBar").css("width"))/305*audioObj.duration;
+        //进度条的显示
+        progressShow();
     }
 });
 $("#progressBtn").bind("mouseup mouseout",function(event){
     moveProgress = false;
+    var activeLiIndx = getActiveMusic();
+    musicObjs[activeLiIndx].scrollLrc();
+});
+//进度条按钮的点击
+$(".progress").click(function(event){
+    clearTimeout(timeClock);
+    clearTimeout(playClock);
+    var ltX = parseInt($(".progress").parent().offset().left);
+    var curX = parseInt(event.pageX);
+    var _x = curX - ltX -20;
+    $("#progressBtn").css("left",_x+"px");
+    $("#progressBar").css("width",_x);
+    var audioObj = $("#audioPlay")[0];
+    audioObj.currentTime = parseFloat($("#progressBar").css("width"))/305*audioObj.duration;
+    //进度条的显示
+    progressShow();
+    var activeLiIndx = getActiveMusic();
+    musicObjs[activeLiIndx].scrollLrc();
 });
 //控件操作
 //播放机|暂停键的操作
