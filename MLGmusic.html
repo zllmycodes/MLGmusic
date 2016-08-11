@@ -44,10 +44,19 @@
 								<div class="modal-content">
 									<div class="modal-header">
 										<button type="button" class="close">&times;</button>
-										<div class="modal-title">请输入您想要添加的音乐名</div>
+										<div class="modal-title">请选择您想要添加的音乐</div>
 									</div>
 									<div class="modal-body">
-										<input id="addInput" type="text" class="form-control" placeholder="请输入您想要添加的音乐名" />
+										<div class="addFile">
+											<button class="btn btn-deafult">选择歌曲</button>
+											<span>未选择文件</span>
+											<input id="addMusic" type="file"/>	
+										</div>
+										<div class="addFile">
+											<button class="btn btn-deafult">选择歌词</button>
+											<span>未选择文件</span>
+											<input id="addLrc" type="file"/>	
+										</div>
 									</div>
 									<div class="modal-footer">
 										<button type="button" id="sureAdd" class="btn btn-info">确定</button>
@@ -55,13 +64,9 @@
 									</div>
 								</div>
 							</div>
+							
 						</div>
 						<span id="musicDele" class="col-xs-1 glyphicon glyphicon-trash"></span>
-						<div class="modal" id="deleModal">
-							<div class="modal-dialog">
-								<div class='alert alert-info'><button type='button' id='closeDele' class='close'>&times;</button>请选择歌曲</div>
-							</div>
-						</div>
 					</h4>
 					<ul id="musicList" class="list-unstyled"></ul>
 				</aside>

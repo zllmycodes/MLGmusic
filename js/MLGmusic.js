@@ -89,6 +89,7 @@ Music.prototype = {
             }
         }
     },
+    //滚动歌词
     scrollLrc:function(){
         var curTime = parseInt($("#audioPlay")[0].currentTime);
         var lrcShow = $("#lrcShow");
@@ -447,3 +448,65 @@ $("#reptMusic").click(function(){
     }
 });
 
+//展示摸态框
+$("#musicAdd").click(function(){
+    $("#addModal").css("display","block");
+    var divObj = document.createElement("div");
+    divObj.setAttribute("class","modal-backdrop fade in");
+    document.getElementsByTagName("body")[0].appendChild(divObj);
+});
+//添加音乐
+$("#sureAdd").click(function(){
+    var musicName = $("#addMusic").val();
+    var lrcfile = $("#addLrc").val();
+    if(!musicName){
+        //判断是否有文件，无文件输出危险提示
+        if($("#addModal .modal-body").find(".alert").get(0) == undefined){
+            $("#addModal .modal-body").append("<div class='alert alert-danger fade in'><button type='button' class='close'>&times;</button>请选择文件</div>");
+            $(".close").click(function(){
+                $(".alert").alert('close');
+            });
+        }
+    }else{
+        //有文件
+        //歌曲文件
+        var fileObj;
+        var musicSuffix = musicName.slice(musicName.indexOf("."));
+        if(musicSuffix == ".mp3"){
+
+        }else{
+            if($("#addModal .modal-body").find(".alert").get(0) == undefined){
+                $("#addModal .modal-body").append("<div class='alert alert-warning fade in'><button type='button' class='close'>&times;</button>文件格式不正确，请添加mp3格式文件</div>");
+                $(".close").click(function(){
+                    $(".alert").alert('close');
+                });
+            }
+        }
+        if(lrcfile){
+            //歌词文件存在
+            var lrcSuffix = lrcfile.slice(lrcfile.indexOf("."));
+            if(lrcSuffix == ".lrc"){
+
+            }else{
+                if($("#addModal .modal-body").find(".alert").get(0) == undefined){
+                    $("#addModal .modal-body").append("<div class='alert alert-danger fade in'><button type='button' class='close'>&times;</button>文件格式不正确，请添加lrc格式文件</div>");
+                    $(".close").click(function(){
+                        $(".alert").alert('close');
+                    });
+                }
+            }
+        }
+    }
+});
+function closeModal(){
+    $("#addModal").css("display","none");
+    $(document).find(".modal-backdrop").remove();
+    $("#addMusic").val("");
+    $("#addLrc").val("");
+}
+$("#closeAdd").click(closeModal);
+$(".close").click(closeModal);
+//删除音乐
+$("#musicDele").click(function(){
+    
+});
